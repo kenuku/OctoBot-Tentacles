@@ -22,8 +22,9 @@ from octobot_trading.api.exchange import get_exchange_names, get_trading_pairs, 
     get_exchange_configurations_from_exchange_name, get_exchange_manager_id
 from octobot_trading.api.symbol_data import get_symbol_data, get_symbol_historical_candles, get_symbol_klines, \
     has_symbol_klines
+from tentacles.Interfaces import WebInterface
 from tentacles.Interfaces.web import add_to_symbol_data_history, get_symbol_data_history
-from tentacles.Interfaces.web.constants import DEFAULT_TIMEFRAME
+from tentacles.Interfaces.web.constants import DEFAULT_TIMEFRAME, BOT_TOOLS_BACKTESTING
 from tentacles.Interfaces.web.enums import PriceStrings
 from octobot_commons.timestamp_util import convert_timestamps_to_datetime, convert_timestamp_to_datetime
 from octobot_commons.time_frame_manager import get_display_time_frame
@@ -159,7 +160,11 @@ def _create_candles_data(symbol, time_frame, historical_candles, kline, bot_api,
                                             time_format="%y-%m-%d %H:%M:%S",
                                             force_timezone=False)
 
-    real_trades_history, simulated_trades_history = get_trades_history(bot_api, symbol)
+    independent_backtesting = WebInterface.tools[BOT_TOOLS_BACKTESTING] if in_backtesting else None
+    bot_api_for_history = None if in_backtesting else bot_api
+    real_trades_history, simulated_trades_history = get_trades_history(bot_api_for_history,
+                                                                       symbol,
+                                                                       independent_backtesting)
 
     if real_trades_history:
         result_dict[real_trades_key] = _format_trades(real_trades_history)

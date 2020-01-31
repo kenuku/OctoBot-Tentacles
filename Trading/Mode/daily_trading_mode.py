@@ -399,7 +399,8 @@ class DailyTradingModeProducer(AbstractTradingModeProducer):
                 await self.submit_trading_evaluation(symbol=symbol, final_note=self.final_eval, state=self.state)
 
                 # send_notification
-                await self._send_alert_notification(symbol, new_state)
+                if not self.exchange_manager.is_backtesting:
+                    await self._send_alert_notification(symbol, new_state)
 
     async def _send_alert_notification(self, symbol, new_state):
         try:
